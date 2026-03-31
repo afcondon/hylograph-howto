@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How-To Guides - Hylograph</title>
+  <style>
+    :root { --bg: #f5f5f5; --card: #fff; --border: #e0e0e0; --text: #333; --muted: #666; --code-bg: #1a1a1a; --code-fg: #e8d5a3; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+    .page { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; }
+    .back { font-size: 0.85rem; color: #999; text-decoration: none; display: block; margin-bottom: 2rem; }
+    .back:hover { color: #333; }
+
+    .page-header { display: flex; align-items: center; gap: 1.25rem; margin-bottom: 0.5rem; }
+    .logo-mark { height: 64px; width: auto; }
+    h1 { font-size: 1.75rem; font-weight: 300; }
+    .subtitle { color: var(--muted); margin-bottom: 2rem; }
+
+    .howto-nav { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 2.5rem; }
+    .howto-nav a { font-size: 0.8rem; padding: 0.3rem 0.7rem; background: var(--card); border: 1px solid var(--border); border-radius: 4px; text-decoration: none; color: var(--text); font-family: monospace; }
+    .howto-nav a:hover { background: #e8e8e8; }
+
+    .howto { margin-bottom: 3rem; }
+    .howto-header h2 { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.25rem; }
+    .howto-desc { font-size: 0.9rem; color: var(--muted); margin-bottom: 0.5rem; }
+    .repo-link { font-size: 0.8rem; color: #2563eb; text-decoration: none; }
+    .repo-link:hover { text-decoration: underline; }
+
+    .howto-content { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; }
+
+    .howto-demo { background: var(--card); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; min-height: 300px; }
+    .howto-demo iframe { width: 100%; height: 100%; min-height: 300px; border: none; }
+
+    .howto-source { background: var(--code-bg); border-radius: 6px; overflow: hidden; display: flex; flex-direction: column; max-height: 400px; }
+    .source-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; color: #8B7355; padding: 0.5rem 1rem 0; }
+    .howto-source pre { flex: 1; overflow: auto; padding: 0.5rem 1rem 1rem; margin: 0; }
+    .howto-source code { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.78rem; line-height: 1.5; color: var(--code-fg); }
+
+    .bookmark { position: fixed; left: 0; top: 0; bottom: 0; width: 48px; z-index: 10; pointer-events: none; }
+    .bookmark img { width: 100%; height: 100%; object-fit: cover; opacity: 0.5; }
+    @media (max-width: 900px) { .bookmark { display: none; } .howto-content { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="bookmark"><img src="images/howto.jpeg" alt=""></div>
+  <main class="page">
+    <a href="./" class="back">&larr; Hylograph</a>
+    <div class="page-header">
+      <img src="images/logo.png" alt="Hylograph" class="logo-mark">
+      <h1>How-To Guides</h1>
+    </div>
+    <p class="subtitle">Self-contained examples. Each one builds from a fresh clone. Demo on the left, source on the right.</p>
+
+    <nav class="howto-nav">
+        <a href="#color-scales">Color Scales</a>
+        <a href="#coordinated-highlighting">Coordinated Highlighting</a>
+        <a href="#css-hover">Css Hover</a>
+        <a href="#zoom-and-pan">Zoom And Pan</a>
+    </nav>
+
+
+    <section class="howto" id="color-scales">
+      <div class="howto-header">
+        <h2>Color Scales</h2>
+        <p class="howto-desc">Color Scales — Linear scales, color interpolators, and tick marks</p>
+        <a href="https://github.com/afcondon/hylograph-howto/tree/main/color-scales" class="repo-link">View in repo &rarr;</a>
+      </div>
+      <div class="howto-content">
+        <div class="howto-demo">
+          <iframe src="color-scales/index.html" loading="lazy"></iframe>
+        </div>
+        <div class="howto-source">
+          <div class="source-label">src/Main.purs</div>
+          <pre><code>-- | Color Scales — Linear scales, color interpolators, and tick marks
+-- | Demonstrates Hylograph's pure scale system without D3.
+module Main where
+
+import Prelude
+import Data.Array (range)
+import Data.Int (toNumber)
+import Effect (Effect)
+import Hylograph.Scale.Pure as Scale
+import Hylograph.Scale.Sequential (interpolateViridis, interpolateRdYlGn)
+import Hylograph.HATS (Tree, elem, forEach, staticStr)
+import Hylograph.HATS.Friendly as F
+import Hylograph.HATS.InterpreterTick (rerender)
+import Hylograph.Internal.Element.Types (ElementType(..))
+
+-- | Build an SVG with two color gradient bars and tick marks
+colorScales :: Number -&gt; Tree
+colorScales w =
+  let
+    n      = 100 -- color samples per bar
+    indices = range 0 (n - 1) &lt;#&gt; \i -&gt;
+                { idx: i, t: toNumber i / toNumber (n - 1) }
+    xScale  = Scale.linear # Scale.domain [0.0, toNumber (n - 1)] # Scale.range [0.0, w]
+    nScale  = Scale.linear # Scale.domain [0.0, 1.0] # Scale.range [0.0, w]
+    ticks   = Scale.ticks 10 nScale
+    barH = 32.0
+    stripW = w / toNumber n + 1.0
+    y1 = 10.0                  -- first bar top
+    yT = y1 + barH + 8.0      -- tick area
+    y2 = yT + 40.0             -- second bar top
+
+    -- Helper: one horizontal gradient bar via thin rects
+    gradientBar name yPos interp =
+      forEach name Rect indices (show &lt;&lt;&lt; _.idx) \s -&gt;
+        elem Rect
+          [ F.x (Scale.applyScale xScale (toNumber s.idx)), F.y yPos
+          , F.width stripW, F.height barH
+          , F.fill (interp s.t)
+          ] []
+  in
+  elem SVG
+    [ F.viewBox 0.0 0.0 (w + 20.0) (y2 + barH + 10.0)
+    , F.width (w + 20.0)
+    , F.style "max-width: 640px; font-family: system-ui, sans-serif;"
+    ]
+    [ gradientBar "viridis" y1 interpolateViridis
+
+    , forEach "ticks" Group ticks show \tv -&gt;
+        let px = Scale.applyScale nScale tv in
+        elem Group []
+          [ elem Line
+              [ F.x1 px, F.y1 yT, F.x2 px, F.y2 (yT + 8.0)
+              , F.stroke "#333", F.strokeWidth 1.0
+              ] []
+          , elem Text
+              [ F.x px, F.y (yT + 20.0), F.textAnchor "middle"
+              , F.fontSize "11", F.fill "#555"
+              , staticStr "textContent" (show tv)
+              ] []
+          ]
+
+    , gradientBar "rdylgn" y2 interpolateRdYlGn
+    ]
+
+main :: Effect Unit
+main = do
+
+  _ &lt;- rerender "#app" (colorScales 500.0)
+  pure unit
+</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="howto" id="coordinated-highlighting">
+      <div class="howto-header">
+        <h2>Coordinated Highlighting</h2>
+        <p class="howto-desc">Coordinated Highlighting — hover a category in the key and all</p>
+        <a href="https://github.com/afcondon/hylograph-howto/tree/main/coordinated-highlighting" class="repo-link">View in repo &rarr;</a>
+      </div>
+      <div class="howto-content">
+        <div class="howto-demo">
+          <iframe src="coordinated-highlighting/index.html" loading="lazy"></iframe>
+        </div>
+        <div class="howto-source">
+          <div class="source-label">src/Main.purs</div>
+          <pre><code>-- | Coordinated Highlighting — hover a category in the key and all
+-- | matching circles in the scatter plot highlight.
+module Main where
+
+import Prelude
+
+import Data.Array (mapWithIndex)
+import Data.Int as Int
+import Data.Maybe (Maybe(..))
+import Effect (Effect)
+
+import Hylograph.HATS (Tree, elem, forEach, staticStr, withBehaviors, onCoordinatedHighlight)
+import Hylograph.HATS.Friendly as F
+import Hylograph.HATS.InterpreterTick (rerender)
+import Hylograph.Internal.Behavior.Types (HighlightClass(..))
+import Hylograph.Internal.Element.Types (ElementType(..))
+
+-- Categories for the key
+type Category = { name :: String, color :: String, idx :: Int }
+
+categories :: Array Category
+categories =
+  [ { name: "Igneous",     color: "#e15759", idx: 0 }
+  , { name: "Sedimentary", color: "#4e79a7", idx: 1 }
+  , { name: "Metamorphic", color: "#59a14f", idx: 2 }
+  , { name: "Volcanic",    color: "#f28e2b", idx: 3 }
+  ]
+
+-- Scattered circles, each belonging to a category
+type Dot = { x :: Number, y :: Number, r :: Number, category :: String, color :: String, id :: String }
+
+dots :: Array Dot
+dots =
+  [ { x: 45.0,  y: 35.0,  r: 10.0, category: "Igneous",     color: "#e15759", id: "d1" }
+  , { x: 160.0, y: 55.0,  r: 14.0, category: "Sedimentary", color: "#4e79a7", id: "d2" }
+  , { x: 90.0,  y: 120.0, r: 8.0,  category: "Metamorphic", color: "#59a14f", id: "d3" }
+  , { x: 210.0, y: 40.0,  r: 11.0, category: "Igneous",     color: "#e15759", id: "d4" }
+  , { x: 130.0, y: 160.0, r: 13.0, category: "Volcanic",    color: "#f28e2b", id: "d5" }
+  , { x: 55.0,  y: 190.0, r: 9.0,  category: "Sedimentary", color: "#4e79a7", id: "d6" }
+  , { x: 240.0, y: 130.0, r: 12.0, category: "Metamorphic", color: "#59a14f", id: "d7" }
+  , { x: 180.0, y: 200.0, r: 10.0, category: "Igneous",     color: "#e15759", id: "d8" }
+  , { x: 30.0,  y: 100.0, r: 15.0, category: "Volcanic",    color: "#f28e2b", id: "d9" }
+  , { x: 270.0, y: 80.0,  r: 7.0,  category: "Sedimentary", color: "#4e79a7", id: "d10" }
+  , { x: 200.0, y: 170.0, r: 11.0, category: "Volcanic",    color: "#f28e2b", id: "d11" }
+  , { x: 100.0, y: 60.0,  r: 9.0,  category: "Metamorphic", color: "#59a14f", id: "d12" }
+  , { x: 150.0, y: 100.0, r: 16.0, category: "Igneous",     color: "#e15759", id: "d13" }
+  , { x: 260.0, y: 190.0, r: 8.0,  category: "Sedimentary", color: "#4e79a7", id: "d14" }
+  , { x: 70.0,  y: 155.0, r: 12.0, category: "Volcanic",    color: "#f28e2b", id: "d15" }
+  ]
+
+-- | The key: labeled color swatches
+keyView :: Tree
+keyView =
+  let swatchH = 28.0
+      gap = 8.0
+  in
+    elem SVG [ F.viewBox 0.0 0.0 140.0 160.0, F.width 140.0, F.height 160.0 ]
+      [ forEach "key" Group categories _.name \cat -&gt;
+          let y = 10.0 + Int.toNumber cat.idx * (swatchH + gap)
+          in withBehaviors
+              [ onCoordinatedHighlight
+                  { identify: cat.name
+                  , classify: \hovered -&gt; if hovered == cat.name then Primary else Dimmed
+                  , group: Nothing
+                  }
+              ] $
+              elem Group [ F.transform ("translate(0," &lt;&gt; show y &lt;&gt; ")") ]
+                [ elem Rect
+                    [ F.x 0.0, F.y 0.0, F.width 20.0, F.height swatchH
+                    , staticStr "rx" "3"
+                    , F.fill cat.color
+                    ] []
+                , elem Text
+                    [ F.x 28.0, F.y (swatchH / 2.0 + 5.0)
+                    , F.fontSize "13"
+                    , F.fontFamily "system-ui, sans-serif"
+                    , F.fill "#333"
+                    , staticStr "textContent" cat.name
+                    ] []
+                ]
+      ]
+
+-- | The scatter: circles colored by category
+scatterView :: Tree
+scatterView =
+  elem SVG [ F.viewBox 0.0 0.0 300.0 230.0, F.width 300.0, F.height 230.0 ]
+    [ forEach "scatter" Group dots _.id \d -&gt;
+        withBehaviors
+          [ onCoordinatedHighlight
+              { identify: d.category  -- identifies as category, not individual dot
+              , classify: \hovered -&gt; if hovered == d.category then Primary else Dimmed
+              , group: Nothing
+              }
+          ] $
+          elem Group []
+            [ elem Circle
+                [ F.cx d.x, F.cy d.y, F.r d.r
+                , F.fill d.color
+                , F.opacity "0.85"
+                ] []
+            ]
+    ]
+
+main :: Effect Unit
+main = do
+  _ &lt;- rerender "#key" keyView
+  _ &lt;- rerender "#scatter" scatterView
+  pure unit
+</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="howto" id="css-hover">
+      <div class="howto-header">
+        <h2>Css Hover</h2>
+        <p class="howto-desc">CSS Hover — pure CSS :hover on HATS elements, no JavaScript needed</p>
+        <a href="https://github.com/afcondon/hylograph-howto/tree/main/css-hover" class="repo-link">View in repo &rarr;</a>
+      </div>
+      <div class="howto-content">
+        <div class="howto-demo">
+          <iframe src="css-hover/index.html" loading="lazy"></iframe>
+        </div>
+        <div class="howto-source">
+          <div class="source-label">src/Main.purs</div>
+          <pre><code>-- | CSS Hover — pure CSS :hover on HATS elements, no JavaScript needed
+module Main where
+
+import Prelude
+
+import Effect (Effect)
+import Hylograph.HATS (Tree, elem, forEach, staticStr)
+import Hylograph.HATS.Friendly as F
+import Hylograph.HATS.InterpreterTick (rerender)
+import Hylograph.Internal.Element.Types (ElementType(..))
+
+type Dot = { color :: String, cx :: Number }
+
+dots :: Array Dot
+dots =
+  [ { color: "#e15759", cx: 40.0 }
+  , { color: "#f28e2b", cx: 104.0 }
+  , { color: "#edc948", cx: 168.0 }
+  , { color: "#59a14f", cx: 232.0 }
+  , { color: "#4e79a7", cx: 296.0 }
+  , { color: "#b07aa1", cx: 360.0 }
+  ]
+
+circles :: Tree
+circles =
+  elem SVG
+    [ F.viewBox 0.0 0.0 400.0 100.0
+    , F.style "max-width: 500px;"
+    ]
+    [ forEach "dots" Circle dots _.color \d -&gt;
+        elem Circle
+          [ F.cx d.cx
+          , F.cy 50.0
+          , F.r 24.0
+          , F.fill d.color
+          , staticStr "class" "hoverable"
+          ] []
+    ]
+
+main :: Effect Unit
+main = do
+  _ &lt;- rerender "#app" circles
+  pure unit
+</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="howto" id="zoom-and-pan">
+      <div class="howto-header">
+        <h2>Zoom And Pan</h2>
+        <p class="howto-desc">Zoom and Pan — Minimal HATS demo</p>
+        <a href="https://github.com/afcondon/hylograph-howto/tree/main/zoom-and-pan" class="repo-link">View in repo &rarr;</a>
+      </div>
+      <div class="howto-content">
+        <div class="howto-demo">
+          <iframe src="zoom-and-pan/index.html" loading="lazy"></iframe>
+        </div>
+        <div class="howto-source">
+          <div class="source-label">src/Main.purs</div>
+          <pre><code>-- | Zoom and Pan — Minimal HATS demo
+-- |
+-- | Renders a 10x10 grid of circles, then attaches native zoom/pan behavior.
+-- | The zoom applies to a &lt;g class="zoom-group"&gt; wrapping all content.
+module Main where
+
+import Prelude
+
+import Data.Array ((..))
+import Data.Int (toNumber)
+import Data.Maybe (Maybe(..))
+import Effect (Effect)
+import Hylograph.HATS (Tree, elem, staticStr, staticNum, forEach)
+import Hylograph.HATS.InterpreterTick (rerender)
+import Hylograph.Interaction.Zoom (attachZoomNative)
+import Hylograph.Internal.Element.Types (ElementType(..))
+import Web.DOM.ParentNode (querySelector, QuerySelector(..))
+import Web.HTML (window)
+import Web.HTML.Window (document)
+import Web.HTML.HTMLDocument (toParentNode)
+
+-- | Grid datum: row and column index
+type Dot = { row :: Int, col :: Int }
+
+-- | Generate a 10x10 grid of dots
+dots :: Array Dot
+dots = do
+  row &lt;- 0 .. 9
+  col &lt;- 0 .. 9
+  pure { row, col }
+
+-- | Build the HATS tree: an SVG containing a zoom-group with circles
+circleGrid :: Tree
+circleGrid =
+  elem SVG
+    [ staticStr "viewBox" "0 0 500 500"
+    , staticStr "width" "500"
+    , staticStr "height" "500"
+    , staticStr "style" "background: #fff;"
+    ]
+    -- Wrap all content in a &lt;g class="zoom-group"&gt; so zoom can target it
+    [ elem Group [ staticStr "class" "zoom-group" ]
+        [ forEach "dots" Circle dots
+            (\d -&gt; show d.row &lt;&gt; "," &lt;&gt; show d.col)
+            \d -&gt;
+              elem Circle
+                [ staticNum "cx" (toNumber d.col * 45.0 + 50.0)
+                , staticNum "cy" (toNumber d.row * 45.0 + 50.0)
+                , staticNum "r" 12.0
+                , staticStr "fill" "#4e79a7"
+                , staticStr "opacity" "0.7"
+                ] []
+        ]
+    ]
+
+main :: Effect Unit
+main = do
+  -- 1. Render the circle grid into #app
+  _ &lt;- rerender "#app" circleGrid
+
+  -- 2. Find the SVG element we just created
+  doc &lt;- window &gt;&gt;= document
+  mSvg &lt;- querySelector (QuerySelector "#app svg") (toParentNode doc)
+
+  -- 3. Attach zoom: scale 0.1x to 10x, targeting the .zoom-group &lt;g&gt;
+  case mSvg of
+    Just svg -&gt; do
+      _ &lt;- attachZoomNative svg 0.1 10.0 ".zoom-group"
+      pure unit
+    Nothing -&gt;
+      pure unit
+</code></pre>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

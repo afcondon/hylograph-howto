@@ -16,16 +16,16 @@
 
     .hoverable {
       cursor: pointer;
-      transition: transform 0.15s ease, opacity 0.15s ease, stroke-width 0.15s ease;
+      transition: opacity 0.15s ease, stroke-width 0.15s ease;
       stroke: transparent;
       stroke-width: 0;
+      transform-box: fill-box;
+      transform-origin: center;
     }
     .hoverable:hover {
-      transform: scale(1.25);
-      transform-origin: center;
       opacity: 0.85;
       stroke: #222;
-      stroke-width: 2;
+      stroke-width: 3;
     }
   </style>
 </head>
@@ -33,6 +33,6 @@
   <h1>CSS Hover</h1>
   <p>Pure CSS :hover on HATS elements. No JavaScript behavior needed.</p>
   <div id="app"></div>
-  <script src="bundle.js"></script>
+  <script type="module" src="bundle.js"></script>
 </body>
 </html>
