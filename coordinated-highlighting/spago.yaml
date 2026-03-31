@@ -1,0 +1,14 @@
+workspace:
+  extraPackages: {}
+
+package:
+  name: coordinated-highlighting
+  dependencies:
+    - effect: ">=4.0.0 <5.0.0"
+    - hylograph-selection: ">=0.5.0 <0.6.0"
+    - maybe: ">=6.0.0 <7.0.0"
+    - prelude: ">=6.0.2 <7.0.0"
+  bundle:
+    module: Main
+    outfile: public/bundle.js
+    platform: browser
