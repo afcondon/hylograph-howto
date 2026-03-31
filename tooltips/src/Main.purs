@@ -43,7 +43,7 @@ view =
                   if hovered == d.name then Primary else Dimmed
               , group: Nothing
               , tooltip: Just
-                  { content: "<b>" <> d.name <> "</b><br/>" <> d.detail
+                  { content: d.name <> " — " <> d.detail
                   , showWhen: OnHover
                   , borderColor: Just d.color
                   }

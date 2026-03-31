@@ -5447,7 +5447,7 @@
         },
         group: Nothing.value,
         tooltip: new Just({
-          content: "<b>" + (d.name + ("</b><br/>" + d.detail)),
+          content: d.name + (" \u2014 " + d.detail),
           showWhen: OnHover.value,
           borderColor: new Just(d.color)
         })
