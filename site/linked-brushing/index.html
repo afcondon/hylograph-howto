@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Linked Brushing</title>
+  <style>
+    body {
+      margin: 40px;
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #fafafa;
+      color: #333;
+    }
+    h1 { font-size: 22px; font-weight: 600; margin-bottom: 4px; }
+    p  { font-size: 14px; color: #666; margin-bottom: 24px; }
+    .panels { display: flex; gap: 32px; }
+    .panel h2 {
+      font-size: 13px;
+      font-weight: 500;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin: 0 0 8px 0;
+    }
+    svg { background: #fff; border: 1px solid #e0e0e0; border-radius: 4px; }
+
+    /* Coordinated interaction classes (applied by the framework) */
+    .point { transition: opacity 0.15s ease; }
+    .point.coord-primary  { opacity: 1 !important; stroke: #333; stroke-width: 2; }
+    .point.coord-selected { opacity: 1 !important; }
+    .point.coord-dimmed   { opacity: 0.12 !important; }
+
+    /* Brush rectangle */
+    .brush-rect {
+      fill: rgba(78, 121, 167, 0.15);
+      stroke: #4e79a7;
+      stroke-width: 1;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>Linked Brushing</h1>
+  <p>Drag to select a region in the left view. Matching points highlight in the right view.</p>
+  <div class="panels">
+    <div class="panel">
+      <h2>X vs Y (brush here)</h2>
+      <svg id="view1" width="360" height="280"></svg>
+    </div>
+    <div class="panel">
+      <h2>X vs Z (linked)</h2>
+      <svg id="view2" width="360" height="280"></svg>
+    </div>
+  </div>
+  <script src="bundle.js"></script>
+</body>
+</html>

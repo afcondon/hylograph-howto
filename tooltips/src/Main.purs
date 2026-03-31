@@ -1,4 +1,8 @@
 -- | Tooltips — hover any circle to see a tooltip with its details.
+-- |
+-- | NOTE: tooltip content is plain text here because the HATS coordinated
+-- | tooltip path in hylograph-selection@0.5.0 uses textContent instead of
+-- | innerHTML, so HTML tags render as literal text. Fix tracked upstream.
 module Main where
 
 import Prelude

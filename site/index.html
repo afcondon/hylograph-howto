@@ -54,14 +54,122 @@
     <p class="subtitle">Self-contained examples. Each one builds from a fresh clone. Demo on the left, source on the right.</p>
 
     <nav class="howto-nav">
+        <a href="#axes-and-ticks">Axes And Ticks</a>
         <a href="#color-scales">Color Scales</a>
         <a href="#coordinated-highlighting">Coordinated Highlighting</a>
         <a href="#css-hover">Css Hover</a>
         <a href="#halogen-integration">Halogen Integration</a>
+        <a href="#linked-brushing">Linked Brushing</a>
+        <a href="#simple-webpage">Simple Webpage</a>
         <a href="#tooltips">Tooltips</a>
         <a href="#zoom-and-pan">Zoom And Pan</a>
     </nav>
 
+
+    <section class="howto" id="axes-and-ticks">
+      <div class="howto-header">
+        <h2>Axes And Ticks</h2>
+        <p class="howto-desc">Axes and Ticks — Scatter plot with X and Y axes using pure scales</p>
+        <a href="https://github.com/afcondon/hylograph-howto/tree/main/axes-and-ticks" class="repo-link">View in repo &rarr;</a>
+      </div>
+      <div class="howto-content">
+        <div class="howto-demo">
+          <iframe src="axes-and-ticks/index.html" loading="lazy"></iframe>
+        </div>
+        <div class="howto-source">
+          <div class="source-label">src/Main.purs</div>
+          <pre><code>-- | Axes and Ticks — Scatter plot with X and Y axes using pure scales
+module Main where
+
+import Prelude
+import Effect (Effect)
+import Hylograph.Scale.Pure as Scale
+import Hylograph.HATS (Tree, elem, forEach, staticStr)
+import Hylograph.HATS.Friendly as F
+import Hylograph.HATS.InterpreterTick (rerender)
+import Hylograph.Internal.Element.Types (ElementType(..))
+
+type Point = { x :: Number, y :: Number, label :: String }
+
+points :: Array Point
+points =
+  [ { x: 10.0, y: 28.0, label: "A" }, { x: 25.0, y: 62.0, label: "B" }
+  , { x: 38.0, y: 45.0, label: "C" }, { x: 52.0, y: 80.0, label: "D" }
+  , { x: 60.0, y: 35.0, label: "E" }, { x: 72.0, y: 90.0, label: "F" }
+  , { x: 85.0, y: 55.0, label: "G" }, { x: 95.0, y: 72.0, label: "H" }
+  , { x: 42.0, y: 18.0, label: "I" }, { x: 68.0, y: 68.0, label: "J" }
+  ]
+
+chart :: Tree
+chart =
+  let
+    ml = 50.0
+    mt = 10.0
+    pw = 440.0
+    ph = 300.0
+    w = ml + pw + 10.0
+    h = mt + ph + 40.0
+    xS = Scale.linear # Scale.domain [0.0, 100.0] # Scale.range [ml, ml + pw]
+    yS = Scale.linear # Scale.domain [0.0, 100.0] # Scale.range [mt + ph, mt]
+    xT = Scale.ticks 5 xS
+    yT = Scale.ticks 5 yS
+    bY = mt + ph
+  in
+  elem SVG
+    [ F.viewBox 0.0 0.0 w h, F.width w
+    , F.style "max-width: 520px; font-family: system-ui, sans-serif;"
+    ]
+    [ forEach "pts" Circle points _.label \pt -&gt;
+        elem Circle
+          [ F.cx (Scale.applyScale xS pt.x), F.cy (Scale.applyScale yS pt.y)
+          , F.r 4.0, F.fill "#2563eb", F.fillOpacity "0.7"
+          ] []
+
+    , elem Line
+        [ F.x1 ml, F.y1 bY, F.x2 (ml + pw), F.y2 bY
+        , F.stroke "#333", F.strokeWidth 1.0
+        ] []
+    , forEach "xTicks" Group xT show \tv -&gt;
+        let px = Scale.applyScale xS tv in
+        elem Group []
+          [ elem Line
+              [ F.x1 px, F.y1 bY, F.x2 px, F.y2 (bY + 6.0)
+              , F.stroke "#333", F.strokeWidth 1.0
+              ] []
+          , elem Text
+              [ F.x px, F.y (bY + 20.0), F.textAnchor "middle"
+              , F.fontSize "11", F.fill "#555"
+              , staticStr "textContent" (show tv)
+              ] []
+          ]
+
+    , elem Line
+        [ F.x1 ml, F.y1 mt, F.x2 ml, F.y2 (mt + ph)
+        , F.stroke "#333", F.strokeWidth 1.0
+        ] []
+    , forEach "yTicks" Group yT show \tv -&gt;
+        let py = Scale.applyScale yS tv in
+        elem Group []
+          [ elem Line
+              [ F.x1 (ml - 6.0), F.y1 py, F.x2 ml, F.y2 py
+              , F.stroke "#333", F.strokeWidth 1.0
+              ] []
+          , elem Text
+              [ F.x (ml - 10.0), F.y (py + 4.0), F.textAnchor "end"
+              , F.fontSize "11", F.fill "#555"
+              , staticStr "textContent" (show tv)
+              ] []
+          ]
+    ]
+
+main :: Effect Unit
+main = do
+  _ &lt;- rerender "#app" chart
+  pure unit
+</code></pre>
+        </div>
+      </div>
+    </section>
 
     <section class="howto" id="color-scales">
       <div class="howto-header">
@@ -363,6 +471,179 @@ main = HA.runHalogenAff do
       </div>
     </section>
 
+    <section class="howto" id="linked-brushing">
+      <div class="howto-header">
+        <h2>Linked Brushing</h2>
+        <p class="howto-desc">Linked Brushing — drag to brush-select in one scatter plot,</p>
+        <a href="https://github.com/afcondon/hylograph-howto/tree/main/linked-brushing" class="repo-link">View in repo &rarr;</a>
+      </div>
+      <div class="howto-content">
+        <div class="howto-demo">
+          <iframe src="linked-brushing/index.html" loading="lazy"></iframe>
+        </div>
+        <div class="howto-source">
+          <div class="source-label">src/Main.purs</div>
+          <pre><code>-- | Linked Brushing — drag to brush-select in one scatter plot,
+-- | matching points highlight in a second scatter plot.
+-- |
+-- | Uses the low-level Coordinated API (registerCoordinated / emitTrigger).
+module Main where
+
+import Prelude
+
+import Data.Array ((..))
+import Data.Foldable (for_)
+import Data.Int (toNumber)
+import Data.Maybe (Maybe(..), maybe)
+import Effect (Effect)
+import Hylograph.Interaction.Coordinated
+  ( BoundingBox, InteractionState(..), InteractionTrigger(..)
+  , mkBrushTrigger, mkClearTrigger, pointInBox
+  , registerCoordinated, emitTrigger )
+import Web.DOM.Element (Element)
+import Web.DOM.ParentNode (querySelector, QuerySelector(..))
+import Web.HTML (window)
+import Web.HTML.HTMLDocument (toParentNode)
+import Web.HTML.Window (document)
+
+-- | Datum shared by both views. Brush hit-testing uses x/y.
+type Datum = { id :: String, x :: Number, y :: Number, z :: Number, color :: String }
+
+group :: Maybe String
+group = Just "linked"
+
+-- | Deterministic "random" based on index — avoids needing random Effect.
+pseudoRandom :: Int -&gt; Number
+pseudoRandom i =
+  let n = (i * 1103515245 + 12345) `mod` 2147483647
+  in toNumber (n `mod` 1000) / 1000.0
+
+-- | 60 data points with three color groups.
+sampleData :: Array Datum
+sampleData =
+  let pick i = case i `mod` 3 of
+        0 -&gt; "#e15759"
+        1 -&gt; "#4e79a7"
+        _ -&gt; "#59a14f"
+  in (0 .. 59) &lt;#&gt; \i -&gt;
+    { id: "p" &lt;&gt; show i
+    , x: 30.0 + pseudoRandom (i * 3) * 300.0
+    , y: 30.0 + pseudoRandom (i * 3 + 1) * 220.0
+    , z: 30.0 + pseudoRandom (i * 3 + 2) * 220.0
+    , color: pick i
+    }
+
+-- | How every element responds to interaction triggers.
+respond :: InteractionTrigger -&gt; Datum -&gt; InteractionState
+respond = case _ of
+  BrushTrigger box -&gt; \d -&gt;
+    if pointInBox { x: d.x, y: d.y } box then Selected else Dimmed
+  HoverTrigger hid -&gt; \d -&gt;
+    if d.id == hid then Primary else Dimmed
+  _ -&gt; const Neutral
+
+-- FFI: create an SVG &lt;circle&gt; with __data__ attached, return the Element.
+foreign import createCircle_
+  :: Element -&gt; Number -&gt; Number -&gt; Number -&gt; String -&gt; Datum -&gt; Effect Element
+
+-- FFI: attach pointer-events brush to an SVG.
+foreign import attachBrush_
+  :: Element -&gt; (BoundingBox -&gt; Effect Unit) -&gt; Effect Unit -&gt; Effect Unit
+
+-- | Add a circle to an SVG and register it for coordinated interaction.
+addPoint :: Element -&gt; Number -&gt; Number -&gt; Datum -&gt; Effect Unit
+addPoint svg cx cy d = do
+  el &lt;- createCircle_ svg cx cy 5.0 d.color d
+  _ &lt;- registerCoordinated el
+    { identify: _.id
+    , respond: respond
+    , group: group
+    , position: Just (\datum -&gt; { x: datum.x, y: datum.y })
+    }
+  pure unit
+
+-- | Query for an SVG element or do nothing.
+withSvg :: String -&gt; (Element -&gt; Effect Unit) -&gt; Effect Unit
+withSvg sel f = do
+  doc &lt;- window &gt;&gt;= document
+  mEl &lt;- querySelector (QuerySelector sel) (toParentNode doc)
+  maybe (pure unit) f mEl
+
+main :: Effect Unit
+main = do
+  -- Populate View 1 (x vs y) and View 2 (x vs z)
+  withSvg "#view1" \svg1 -&gt; do
+    for_ sampleData \d -&gt; addPoint svg1 d.x d.y d
+    attachBrush_ svg1
+      (\box -&gt; emitTrigger group (mkBrushTrigger box))
+      (emitTrigger group mkClearTrigger)
+
+  withSvg "#view2" \svg2 -&gt;
+    for_ sampleData \d -&gt; addPoint svg2 d.x d.z d
+</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="howto" id="simple-webpage">
+      <div class="howto-header">
+        <h2>Simple Webpage</h2>
+        <p class="howto-desc">Simple Webpage — minimum viable HATS visualization</p>
+        <a href="https://github.com/afcondon/hylograph-howto/tree/main/simple-webpage" class="repo-link">View in repo &rarr;</a>
+      </div>
+      <div class="howto-content">
+        <div class="howto-demo">
+          <iframe src="simple-webpage/index.html" loading="lazy"></iframe>
+        </div>
+        <div class="howto-source">
+          <div class="source-label">src/Main.purs</div>
+          <pre><code>-- | Simple Webpage — minimum viable HATS visualization
+module Main where
+
+import Prelude
+import Effect (Effect)
+import Hylograph.HATS (Tree, elem, forEach, staticStr)
+import Hylograph.HATS.Friendly as F
+import Hylograph.HATS.InterpreterTick (rerender)
+import Hylograph.Internal.Element.Types (ElementType(..))
+
+type Bar = { label :: String, h :: Number, x :: Number, color :: String }
+
+bars :: Array Bar
+bars =
+  [ { label: "A", h: 90.0, x:  20.0, color: "#4e79a7" }
+  , { label: "B", h: 60.0, x:  75.0, color: "#f28e2b" }
+  , { label: "C", h: 75.0, x: 130.0, color: "#e15759" }
+  , { label: "D", h: 40.0, x: 185.0, color: "#76b7b2" }
+  , { label: "E", h: 55.0, x: 240.0, color: "#59a14f" }
+  ]
+
+chart :: Tree
+chart =
+  elem SVG [ F.viewBox 0.0 0.0 300.0 130.0, F.style "max-width: 400px;" ]
+    [ forEach "bars" Group bars _.label \d -&gt;
+        elem Group []
+          [ elem Rect
+              [ F.x d.x, F.y (100.0 - d.h), F.width 40.0, F.height d.h
+              , F.fill d.color
+              ] []
+          , elem Text
+              [ F.x (d.x + 20.0), F.y 120.0
+              , F.textAnchor "middle", F.fontSize "12px", F.fill "#333"
+              , staticStr "textContent" d.label
+              ] []
+          ]
+    ]
+
+main :: Effect Unit
+main = do
+  _ &lt;- rerender "#app" chart
+  pure unit
+</code></pre>
+        </div>
+      </div>
+    </section>
+
     <section class="howto" id="tooltips">
       <div class="howto-header">
         <h2>Tooltips</h2>
@@ -376,6 +657,10 @@ main = HA.runHalogenAff do
         <div class="howto-source">
           <div class="source-label">src/Main.purs</div>
           <pre><code>-- | Tooltips — hover any circle to see a tooltip with its details.
+-- |
+-- | NOTE: tooltip content is plain text here because the HATS coordinated
+-- | tooltip path in hylograph-selection@0.5.0 uses textContent instead of
+-- | innerHTML, so HTML tags render as literal text. Fix tracked upstream.
 module Main where
 
 import Prelude
