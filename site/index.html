@@ -58,6 +58,7 @@
         <a href="#color-scales">Color Scales</a>
         <a href="#coordinated-highlighting">Coordinated Highlighting</a>
         <a href="#css-hover">Css Hover</a>
+        <a href="#general-update-pattern">General Update Pattern</a>
         <a href="#halogen-integration">Halogen Integration</a>
         <a href="#simple-webpage">Simple Webpage</a>
         <a href="#tooltips">Tooltips</a>
@@ -436,6 +437,35 @@ main :: Effect Unit
 main = do
   _ &lt;- rerender "#app" circles
   pure unit
+</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="howto" id="general-update-pattern">
+      <div class="howto-header">
+        <h2>General Update Pattern</h2>
+        <p class="howto-desc">general-update-pattern</p>
+        <a href="https://github.com/afcondon/hylograph-howto/tree/main/general-update-pattern" class="repo-link">View in repo &rarr;</a>
+      </div>
+      <div class="howto-content">
+        <div class="howto-demo">
+          <iframe src="general-update-pattern/index.html" loading="lazy"></iframe>
+        </div>
+        <div class="howto-source">
+          <div class="source-label">src/Main.purs</div>
+          <pre><code>module Main where
+
+import Prelude
+import Effect (Effect)
+import Halogen.Aff as HA
+import Halogen.VDom.Driver (runUI)
+import App as App
+
+main :: Effect Unit
+main = HA.runHalogenAff do
+  body &lt;- HA.awaitBody
+  runUI App.component unit body
 </code></pre>
         </div>
       </div>
