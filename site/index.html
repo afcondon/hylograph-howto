@@ -58,9 +58,11 @@
         <a href="#color-scales">Color Scales</a>
         <a href="#coordinated-highlighting">Coordinated Highlighting</a>
         <a href="#css-hover">Css Hover</a>
+        <a href="#enter-update-exit">Enter Update Exit</a>
         <a href="#halogen-integration">Halogen Integration</a>
         <a href="#linked-brushing">Linked Brushing</a>
         <a href="#simple-webpage">Simple Webpage</a>
+        <a href="#staggered-transitions">Staggered Transitions</a>
         <a href="#tooltips">Tooltips</a>
         <a href="#zoom-and-pan">Zoom And Pan</a>
     </nav>
@@ -442,6 +444,33 @@ main = do
       </div>
     </section>
 
+    <section class="howto" id="enter-update-exit">
+      <div class="howto-header">
+        <h2>Enter Update Exit</h2>
+        <p class="howto-desc">enter-update-exit</p>
+        <a href="https://github.com/afcondon/hylograph-howto/tree/main/enter-update-exit" class="repo-link">View in repo &rarr;</a>
+      </div>
+      <div class="howto-content">
+        <div class="howto-demo">
+          <iframe src="enter-update-exit/index.html" loading="lazy"></iframe>
+        </div>
+        <div class="howto-source">
+          <div class="source-label">src/Main.purs</div>
+          <pre><code>module Main where
+
+import Prelude
+import Effect (Effect)
+import Halogen.Aff as HA
+import Halogen.VDom.Driver (runUI)
+import App as App
+
+main :: Effect Unit
+main = HA.runHalogenAff (HA.awaitBody &gt;&gt;= runUI App.component unit)
+</code></pre>
+        </div>
+      </div>
+    </section>
+
     <section class="howto" id="halogen-integration">
       <div class="howto-header">
         <h2>Halogen Integration</h2>
@@ -640,6 +669,34 @@ main = do
   _ &lt;- rerender "#app" chart
   pure unit
 </code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="howto" id="staggered-transitions">
+      <div class="howto-header">
+        <h2>Staggered Transitions</h2>
+        <p class="howto-desc">staggered-transitions</p>
+        <a href="https://github.com/afcondon/hylograph-howto/tree/main/staggered-transitions" class="repo-link">View in repo &rarr;</a>
+      </div>
+      <div class="howto-content">
+        <div class="howto-demo">
+          <iframe src="staggered-transitions/index.html" loading="lazy"></iframe>
+        </div>
+        <div class="howto-source">
+          <div class="source-label">src/Main.purs</div>
+          <pre><code>module Main where
+
+import Prelude
+import Effect (Effect)
+import Halogen.Aff as HA
+import Halogen.VDom.Driver (runUI)
+import App as App
+
+main :: Effect Unit
+main = HA.runHalogenAff do
+  body &lt;- HA.awaitBody
+  runUI App.component unit body</code></pre>
         </div>
       </div>
     </section>
