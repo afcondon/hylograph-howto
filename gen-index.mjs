@@ -44,8 +44,11 @@ const sections = howtos.map(h => `
           <iframe src="${h.name}/index.html" loading="lazy"></iframe>
         </div>
         <div class="howto-source">
-          <div class="source-label">src/Main.purs</div>
-          <pre><code>${escapeHtml(h.source)}</code></pre>
+          <div class="source-header">
+            <span class="source-label">src/Main.purs</span>
+            <button class="copy-btn" onclick="copySource(this)">Copy</button>
+          </div>
+          <pre><code class="language-haskell">${escapeHtml(h.source)}</code></pre>
         </div>
       </div>
     </section>`).join('\n');
@@ -60,8 +63,11 @@ const html = `<!DOCTYPE html>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>How-To Guides - Hylograph</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-haskell.min.js"></script>
   <style>
-    :root { --bg: #f5f5f5; --card: #fff; --border: #e0e0e0; --text: #333; --muted: #666; --code-bg: #1a1a1a; --code-fg: #e8d5a3; }
+    :root { --bg: #f5f5f5; --card: #fff; --border: #e0e0e0; --text: #333; --muted: #666; --code-bg: #f8f8f6; --code-fg: #333; }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
 
@@ -89,22 +95,35 @@ const html = `<!DOCTYPE html>
     .howto-demo { background: var(--card); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; min-height: 300px; }
     .howto-demo iframe { width: 100%; height: 100%; min-height: 300px; border: none; }
 
-    .howto-source { background: var(--code-bg); border-radius: 6px; overflow: hidden; display: flex; flex-direction: column; max-height: 400px; }
-    .source-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; color: #8B7355; padding: 0.5rem 1rem 0; }
+    .howto-source { background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; display: flex; flex-direction: column; max-height: 400px; }
+    .source-header { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 1rem 0; }
+    .source-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; color: #999; }
+    .copy-btn { font-size: 0.65rem; color: #999; background: none; border: 1px solid #ddd; border-radius: 3px; padding: 2px 8px; cursor: pointer; font-family: system-ui, sans-serif; }
+    .copy-btn:hover { color: #333; border-color: #999; }
+    .copy-btn.copied { color: #16653e; border-color: #16653e; }
     .howto-source pre { flex: 1; overflow: auto; padding: 0.5rem 1rem 1rem; margin: 0; }
     .howto-source code { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.78rem; line-height: 1.5; color: var(--code-fg); }
+    .howto-source code[class*="language-"] { background: none; }
+    .howto-source .token.keyword { color: #7c3aed; }
+    .howto-source .token.string { color: #b45309; }
+    .howto-source .token.number { color: #0369a1; }
+    .howto-source .token.comment { color: #999; font-style: italic; }
+    .howto-source .token.operator { color: #888; }
+    .howto-source .token.punctuation { color: #999; }
+    .howto-source .token.class-name { color: #16653e; }
+    .howto-source .token.title { color: #1a1a1a; font-weight: 600; }
 
-    .bookmark { position: fixed; left: 0; top: 0; bottom: 0; width: 48px; z-index: 10; pointer-events: none; }
-    .bookmark img { width: 100%; height: 100%; object-fit: cover; opacity: 0.5; }
+    .bookmark { position: fixed; left: 0; top: 0; bottom: 0; width: 64px; z-index: 10; pointer-events: none; }
+    .bookmark img { width: 100%; height: 100%; object-fit: cover; }
     @media (max-width: 900px) { .bookmark { display: none; } .howto-content { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
-  <div class="bookmark"><img src="images/howto.jpeg" alt=""></div>
+  <div class="bookmark"><img src="../images/howto.jpeg" alt=""></div>
   <main class="page">
-    <a href="./" class="back">&larr; Hylograph</a>
+    <a href="../" class="back">&larr; Hylograph</a>
     <div class="page-header">
-      <img src="images/logo.png" alt="Hylograph" class="logo-mark">
+      <img src="../images/logo.png" alt="Hylograph" class="logo-mark">
       <h1>How-To Guides</h1>
     </div>
     <p class="subtitle">Self-contained examples. Each one builds from a fresh clone. Demo on the left, source on the right.</p>
@@ -115,6 +134,16 @@ ${nav}
 
 ${sections}
   </main>
+  <script>
+    function copySource(btn) {
+      const code = btn.closest('.howto-source').querySelector('code');
+      navigator.clipboard.writeText(code.textContent).then(() => {
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1500);
+      });
+    }
+  </script>
 </body>
 </html>`;
 
